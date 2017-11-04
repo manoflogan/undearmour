@@ -1,7 +1,9 @@
 package com.underarmour.assignment;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class ChatController {
   
   private final IChatService chatService;
   
-  private final static Logger LOGGER = LoggerFactory.getLogger(ChatService.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(ChatController.class);
   
   @Autowired
   public ChatController(IChatService chatService) {
@@ -45,23 +47,40 @@ public class ChatController {
     }
     long chatId = this.chatService.insertChatRecord(chatRecord);
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Generated the chat record id" + chatId);
+      LOGGER.debug("Generated the chat record id: " + chatId);
     }
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("id", chatId);
     return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
   }
   
-  @RequestMapping("/chats/{id}")
+  @RequestMapping("/chats/id/{id}")
   @GetMapping
-  public Map<String, Object> fetchAllChats(final @PathVariable("id") long id) {
-    
-    ChatRecord chatRecord = this.chatService.getChatById(id);
+  public Map<String, Object> fetchChatsById(@PathVariable("id") final long id) {
+    ChatHistory chatRecord = this.chatService.getChatById(id);
     Map<String, Object> chatRecordMap = new LinkedHashMap<>();
     chatRecordMap.put("username", chatRecord.getUsername());
-    chatRecordMap.put("text", chatRecord.getUsername());
-    chatRecordMap.put("expiration_date", chatRecord.getExpirationTimestamp());
+    chatRecordMap.put("text", chatRecord.getText());
+    chatRecordMap.put("expiration_date", chatRecord.getExpirationDate());
     return chatRecordMap;
+  }
+  
+  @RequestMapping("/chats/username/{username}")
+  @GetMapping
+  public Set<Map<String, Object>> fetchChatsByUsername(
+      @PathVariable("username") final String username) {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Fetching chats by username : " + username);
+    }
+    Set<ChatHistory> chatRecords = this.chatService.getChatRecordByUserName(username);
+    Set<Map<String, Object>> records = new LinkedHashSet<>();
+    for (ChatHistory chatRecord: chatRecords) {
+      Map<String, Object> map = new LinkedHashMap<>();
+      map.put("id", chatRecord.getChatId());
+      map.put("text", chatRecord.getText());
+      records.add(map);
+    }
+    return records;
   }
 
 }

@@ -3,6 +3,7 @@
  */
 package com.underarmour.assignment;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class ChatService implements IChatService {
   public long insertChatRecord(ChatRecord chatRecord) {
     // TODO Auto-generated method stub
     if (LOGGER.isDebugEnabled())  {
-      LOGGER.debug("Inserting chat record.");
+      LOGGER.debug("Inserting chat record. " + chatRecord);
     }
     return this.chatRecordDao.insertChatRecord(chatRecord);
   }
@@ -47,12 +48,18 @@ public class ChatService implements IChatService {
    */
   @Override
   @Transactional
-  public ChatRecord getChatById(long id) {
+  public ChatHistory getChatById(long id) {
     // TODO Auto-generated method stub
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Fetching chat record by " + id);
     }
-    return this.chatRecordDao.getChatRecordById(id);
+    ChatRecord record = this.chatRecordDao.getChatRecordById(id);
+    ChatHistory chatHistory = new ChatHistory.Builder().
+        withChatId(record.getChatId()).withUsername(record.getUsername()).
+        withText(record.getText()).
+        withExpirationDate(Utils.dateToString(record.getExpirationTimestamp())).build();
+    return chatHistory;
+    
   }
 
  /**
@@ -64,25 +71,34 @@ public class ChatService implements IChatService {
   */
   @Transactional
   @Override
-  public Set<ChatRecord> getChatRecordByUserName(String username) {
+  public Set<ChatHistory> getChatRecordByUserName(String username) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Fetching chat record by " + username);
     }
-    Set<ChatRecord> chatRecords = this.getChatRecordByUserName(username);
+    Set<ChatRecord> chatRecords = this.chatRecordDao.getChatRecordsByUsername(username);
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Fetched chat records " + chatRecords);
     }
+    Set<ChatHistory> chatHistories = new LinkedHashSet<>();
     if (!chatRecords.isEmpty()) {
       Set<Long> userIds = new LinkedHashSet<>();
       for (ChatRecord chatRecord : chatRecords) {
+        if (chatRecord == null) {
+          continue;
+        }
         userIds.add(chatRecord.getChatId());
+        ChatHistory chatHistory = new ChatHistory.Builder().
+            withChatId(chatRecord.getChatId()).withUsername(chatRecord.getUsername()).
+            withExpirationDate(
+                Utils.dateToString(chatRecord.getExpirationTimestamp())).build();
+        chatHistories.add(chatHistory);
       }
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Marking the chat records as expired. " + userIds);
       }
       this.chatRecordDao.markChatRecordsAsExpired(userIds);
     }
-    return chatRecords;
+    return Collections.unmodifiableSet(chatHistories);
   }
 
 }

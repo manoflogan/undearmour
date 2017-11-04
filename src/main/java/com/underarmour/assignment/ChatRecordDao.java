@@ -13,9 +13,8 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,8 +29,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ChatRecordDao implements IChatRecordDao {
-
-  private static final String TIMESTAMP_FORMAT = "YYYY-MM-DD HH:MM:SS";
+  
+  private final static Logger LOGGER = LoggerFactory.getLogger(ChatRecordDao.class);
   
   private DataSource dataSource;
   
@@ -53,15 +52,17 @@ public class ChatRecordDao implements IChatRecordDao {
    */
   @Override
   public long insertChatRecord(final ChatRecord chatRecord) {
-    DateTime dateTime = DateTime.now().withZone(DateTimeZone.UTC);
-    DateTime expirationTime = dateTime.plusSeconds(
-        chatRecord.getTimeout() != null ? chatRecord.getTimeout().intValue(): 60);
-    final String timestamp = expirationTime.toString(TIMESTAMP_FORMAT);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Inserting chat record: " + chatRecord);
+    }
+    
     long chatId = SequenceGenerator.getInstance().next();
     chatRecord.setChatId(chatId);
-    chatRecord.setExpirationTimestamp(expirationTime);
+    DateTime dateTime = Utils.addTimeToCurrent(chatRecord.getTimeout(), 60);
+    chatRecord.setExpirationTimestamp(dateTime);
+    final String timestamp = Utils.dateToString(dateTime);
     StringBuilder sb = new StringBuilder();
-    sb.append("INSERT INTO CHATS(chat_id, username, chat_text, expiration_date) ");
+    sb.append("INSERT INTO Chats(chat_id, username, chat_text, expiration_date) ");
     sb.append("VALUES(?, ?, ?, ?)");
     jdbcTemplate.update(sb.toString(), new PreparedStatementSetter() {
 
@@ -101,9 +102,8 @@ public class ChatRecordDao implements IChatRecordDao {
         while(rs.next()) {
           chatRecord.setUsername(rs.getString("username"));
           chatRecord.setText(rs.getString("chat_text"));
-          DateTimeFormatter format = DateTimeFormat.forPattern(TIMESTAMP_FORMAT);
-          DateTime dateTime = format.parseDateTime(rs.getString("expiration_date"));
-          chatRecord.setExpirationTimestamp(dateTime);
+          chatRecord.setExpirationTimestamp(
+              Utils.stringToDate(rs.getString("expiration_date")));
         }
         return chatRecord;
       }});
@@ -121,9 +121,7 @@ public class ChatRecordDao implements IChatRecordDao {
       @Override
       public void setValues(PreparedStatement ps) throws SQLException {
         ps.setString(1, username);
-        DateTime dateTime = DateTime.now().withZone(DateTimeZone.UTC);
-        final String timestamp = dateTime.toString(TIMESTAMP_FORMAT);
-        ps.setString(2,  timestamp);
+        ps.setString(2,  Utils.currentTimeToDate());
       }
       
     }, new ResultSetExtractor<Set<ChatRecord>>() {
@@ -136,9 +134,8 @@ public class ChatRecordDao implements IChatRecordDao {
           ChatRecord record = new ChatRecord();
           record.setChatId(rs.getLong("chat_id"));
           record.setText(rs.getString("chat_text"));
-          DateTimeFormatter format = DateTimeFormat.forPattern(TIMESTAMP_FORMAT);
-          DateTime dateTime = format.parseDateTime(rs.getString("expiration_date"));
-          record.setExpirationTimestamp(dateTime);
+          record.setExpirationTimestamp(
+              Utils.stringToDate(rs.getString("expiration_date")));
         }
         return Collections.unmodifiableSet(chatRecords);
       }});
@@ -161,10 +158,7 @@ public class ChatRecordDao implements IChatRecordDao {
 
       @Override
       public void setValues(PreparedStatement ps) throws SQLException {
-        
-        DateTime dt = DateTime.now().withZone(DateTimeZone.UTC);
-        final String timestamp = dt.toString(TIMESTAMP_FORMAT);
-        ps.setString(1, timestamp);
+        ps.setString(1, Utils.currentTimeToDate());
         int counter = 2;
         for (long userId : userIds) {
           ps.setLong(counter ++, userId);

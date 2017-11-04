@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 @Configuration
-@PropertySource(value="classpath:database.properties", ignoreResourceNotFound=false)
+@PropertySource(value="classpath:application.properties", ignoreResourceNotFound=true)
 public class DatabaseCredentials {
   
   @Value("${spring.datasource.driver-class-name}")

@@ -17,7 +17,7 @@ public class ChatRecord {
   
   private String text;
   
-  private long chatId;
+  private Long chatId;
   
   private Integer timeout;
   
@@ -39,11 +39,11 @@ public class ChatRecord {
     this.text = text;
   }
 
-  public long getChatId() {
+  public Long getChatId() {
     return chatId;
   }
 
-  public void setChatId(long chatId) {
+  public void setChatId(Long chatId) {
     this.chatId = chatId;
   }
 
@@ -76,7 +76,7 @@ public class ChatRecord {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (int) (chatId ^ (chatId >>> 32));
+    result = prime * result + (int) (chatId != null ? chatId.hashCode() : 0);
     result = prime * result + ((text == null) ? 0 : text.hashCode());
     result = prime * result + (int) (timeout != null ? (timeout.intValue() >>> 32) : 0);
     result = prime * result +

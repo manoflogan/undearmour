@@ -23,7 +23,7 @@ public interface IChatService {
    * @param id id by which the chat record is fetched
    * @return chat record
    */
-  ChatRecord getChatById(long id);
+  ChatHistory getChatById(long id);
   
   /**
    * Fetches chat recored by username
@@ -31,7 +31,7 @@ public interface IChatService {
    * @param username username
    * @return chat record instance
    */
-  Set<ChatRecord> getChatRecordByUserName(String username);
+  Set<ChatHistory> getChatRecordByUserName(String username);
   
 
 }
