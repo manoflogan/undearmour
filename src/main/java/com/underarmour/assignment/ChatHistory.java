@@ -76,6 +76,7 @@ public class ChatHistory {
   public String toString() {
     return new StringBuilder(this.getClass().getSimpleName()).append("[username=").
         append(username).append(", chatId =").append(chatId).
+        append(", text =").append(this.text).
         append(", expirationDate=").append(expirationDate).append("]").toString();
   }
   

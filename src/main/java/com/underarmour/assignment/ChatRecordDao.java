@@ -60,7 +60,7 @@ public class ChatRecordDao implements IChatRecordDao {
     chatRecord.setChatId(chatId);
     DateTime dateTime = Utils.addTimeToCurrent(chatRecord.getTimeout(), 60);
     chatRecord.setExpirationTimestamp(dateTime);
-    final String timestamp = Utils.dateToString(dateTime);
+    final long timeInMilliseconds = dateTime.getMillis();
     StringBuilder sb = new StringBuilder();
     sb.append("INSERT INTO Chats(chat_id, username, chat_text, expiration_date) ");
     sb.append("VALUES(?, ?, ?, ?)");
@@ -73,7 +73,7 @@ public class ChatRecordDao implements IChatRecordDao {
         ps.setLong(1, chatRecord.getChatId());
         ps.setString(2,  chatRecord.getUsername());
         ps.setString(3,  chatRecord.getText());
-        ps.setString(4, timestamp);
+        ps.setLong(4, timeInMilliseconds);
       }});
     return chatId;
   }
@@ -114,14 +114,14 @@ public class ChatRecordDao implements IChatRecordDao {
    */
   @Override
   public Set<ChatRecord> getChatRecordsByUsername(String username) {
-    String sql = "SELECT chat_id, chat_text FROM CHATS where username = ? and expiration_date > ?";
+    String sql = "SELECT chat_id, chat_text FROM CHATS where username = ? and expiration_date >= ?";
     Set<ChatRecord> chatRecords = 
         this.jdbcTemplate.query(sql, new PreparedStatementSetter() {
 
       @Override
       public void setValues(PreparedStatement ps) throws SQLException {
         ps.setString(1, username);
-        ps.setString(2,  Utils.currentTimeToDate());
+        ps.setLong(2,  Utils.currentTime().getMillis());
       }
       
     }, new ResultSetExtractor<Set<ChatRecord>>() {
@@ -139,7 +139,7 @@ public class ChatRecordDao implements IChatRecordDao {
         }
         return Collections.unmodifiableSet(chatRecords);
       }});
-    return chatRecords;
+    return Collections.unmodifiableSet(chatRecords);
   }
 
   @Override

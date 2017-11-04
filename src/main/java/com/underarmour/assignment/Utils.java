@@ -47,7 +47,7 @@ public class Utils {
     return dateTime != null ? dateTime.toString(TIMESTAMP_FORMAT) : "";
   }
   
-  static private DateTime currentTime() {
+  static DateTime currentTime() {
     return DateTime.now().withZone(DateTimeZone.UTC);
   }
   
