@@ -86,5 +86,4 @@ public class ChatController {
     }
     return records;
   }
-
 }

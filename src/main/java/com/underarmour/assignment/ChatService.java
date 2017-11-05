@@ -69,7 +69,7 @@ public class ChatService implements IChatService {
   * Performs two operations.
   * <ul>
   *   <li>Fetches all unexpired chats chat record by username.</li>
-  *   <li>Updates the expired status status to expire
+  *   <li>Updates the expired status status to expire.</li>
   * </ul>
   */
   @Transactional
@@ -99,7 +99,11 @@ public class ChatService implements IChatService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Marking the chat records as expired. " + userIds);
       }
-      this.chatRecordDao.markChatRecordsAsExpired(userIds);
+      int rowsUpdated = this.chatRecordDao.markChatRecordsAsExpired(userIds);
+      //assert rowsUpdated == userIds.size();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(rowsUpdated + " row(s) were updated for username " + username);
+      }
     }
     return Collections.unmodifiableSet(chatHistories);
   }

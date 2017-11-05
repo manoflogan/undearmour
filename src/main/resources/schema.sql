@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS Chats;CREATE TABLE IF NOT EXISTS Chats(username VARCHAR(20), chat_text VARCHAR(256), chat_id BIGINT, expiration_date TIMESTAMP, PRIMARY KEY(chat_id) )
+CREATE TABLE IF NOT EXISTS Chats(username VARCHAR(20), chat_text VARCHAR(256), chat_id BIGINT, expiration_date TIMESTAMP, PRIMARY KEY(chat_id) )
