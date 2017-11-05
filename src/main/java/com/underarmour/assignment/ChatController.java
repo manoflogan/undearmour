@@ -1,5 +1,6 @@
 package com.underarmour.assignment;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -58,6 +59,9 @@ public class ChatController {
   @GetMapping
   public Map<String, Object> fetchChatsById(@PathVariable("id") final long id) {
     ChatHistory chatRecord = this.chatService.getChatById(id);
+    if (chatRecord == null) {
+      return Collections.emptyMap();
+    }
     Map<String, Object> chatRecordMap = new LinkedHashMap<>();
     chatRecordMap.put("username", chatRecord.getUsername());
     chatRecordMap.put("text", chatRecord.getText());

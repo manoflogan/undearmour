@@ -1,6 +1,6 @@
 package com.underarmour.assignment;
 
-import org.joda.time.DateTime;
+import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -21,7 +21,7 @@ public class ChatRecord {
   
   private Integer timeout;
   
-  private DateTime expirationTimestamp;
+  private Instant expirationTimestamp;
 
   public String getUsername() {
     return username;
@@ -47,11 +47,11 @@ public class ChatRecord {
     this.chatId = chatId;
   }
 
-  public DateTime getExpirationTimestamp() {
+  public Instant getExpirationTimestamp() {
     return expirationTimestamp;
   }
 
-  public void setExpirationTimestamp(DateTime expirationTimestamp) {
+  public void setExpirationTimestamp(Instant expirationTimestamp) {
     this.expirationTimestamp = expirationTimestamp;
   }
 

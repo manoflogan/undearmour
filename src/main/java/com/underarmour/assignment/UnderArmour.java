@@ -9,6 +9,4 @@ public  class UnderArmour {
   public static void main(String[] args) throws Exception {
     SpringApplication.run(UnderArmour.class, args);
   }
-  
-
 }

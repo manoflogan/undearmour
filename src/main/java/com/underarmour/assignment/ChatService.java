@@ -54,6 +54,9 @@ public class ChatService implements IChatService {
       LOGGER.debug("Fetching chat record by " + id);
     }
     ChatRecord record = this.chatRecordDao.getChatRecordById(id);
+    if (record == null) {
+      return null;
+    }
     ChatHistory chatHistory = new ChatHistory.Builder().
         withChatId(record.getChatId()).withUsername(record.getUsername()).
         withText(record.getText()).
@@ -89,7 +92,7 @@ public class ChatService implements IChatService {
         userIds.add(chatRecord.getChatId());
         ChatHistory chatHistory = new ChatHistory.Builder().
             withChatId(chatRecord.getChatId()).withUsername(chatRecord.getUsername()).
-            withExpirationDate(
+            withText(chatRecord.getText()).withExpirationDate(
                 Utils.dateToString(chatRecord.getExpirationTimestamp())).build();
         chatHistories.add(chatHistory);
       }

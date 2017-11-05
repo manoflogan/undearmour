@@ -1,5 +1,7 @@
 package com.underarmour.assignment;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +34,16 @@ public class DatabaseCredentials {
     dataSource.setUsername(this.username);
     dataSource.setPassword(this.password);
     return dataSource;
+  }
+  
+  @PostConstruct
+  void setH2DbProperties() {
+    System.setProperty("h2.implicitRelativePath", "true");
+  }
+  
+  @PreDestroy
+  void removeH2DbProperties() {
+    System.clearProperty("h2.implicitRelativePath");
   }
 
 }
