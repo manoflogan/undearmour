@@ -78,9 +78,6 @@ public class ChatRecord {
     int result = 1;
     result = prime * result + (int) (chatId != null ? chatId.hashCode() : 0);
     result = prime * result + ((text == null) ? 0 : text.hashCode());
-    result = prime * result + (int) (timeout != null ? (timeout.intValue() >>> 32) : 0);
-    result = prime * result +
-        (expirationTimestamp != null ? expirationTimestamp.hashCode() : 0);
     result = prime * result + ((username == null) ? 0 : username.hashCode());
     return result;
   }
@@ -97,12 +94,12 @@ public class ChatRecord {
       return false;
     }
     ChatRecord other = (ChatRecord) obj;
-    return this.chatId == other.chatId && 
-        this.text != null && this.text.equals(other.text) &&
-        this.expirationTimestamp != null && this.expirationTimestamp.equals(
-            other.expirationTimestamp) &&
-        this.timeout != other.timeout &&
-        this.username != null && this.username.equals(other.username);
+    return (this.chatId == other.chatId ||
+        (this.chatId != null && this.chatId.equals(other.chatId))) && 
+        (this.text == other.text ||
+        (this.text != null && this.text.equals(other.text))) &&
+        (this.username == other.username ||
+        (this.username != null && this.username.equals(other.username)));
   }
   
   

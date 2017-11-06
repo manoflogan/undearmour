@@ -1,5 +1,10 @@
 package com.underarmour.assignment;
 
+/**
+ * Implementation of generator that generates a unique sequence.
+ * 
+ * @author krishnanand (Kartik Krishnanand)
+ */
 public class SequenceGenerator {
   
 

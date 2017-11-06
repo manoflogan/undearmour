@@ -26,6 +26,22 @@ public class DatabaseCredentials {
   @Value("${spring.datasource.password}")
   private String password;
   
+  public String getDriverClass() {
+    return driverClass;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
   @Bean()
   public DataSource dataSource() {
     DriverManagerDataSource dataSource = new DriverManagerDataSource();
