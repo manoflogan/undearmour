@@ -3,6 +3,7 @@
  */
 package com.underarmour.assignment;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -68,6 +69,14 @@ public class ChatControllerTest {
     Assert.assertEquals(map.get("username"), chatRecord.getUsername());
     Assert.assertEquals(map.get("text"), chatRecord.getText());
     Assert.assertEquals(map.get("expiration_date"), chatRecord.getExpirationDate());
+    Mockito.verify(this.chatService).getChatById(1000L);
+    Mockito.verifyNoMoreInteractions(this.chatService);
+  }
+  
+  @Test
+  public void testGetChatHistoryById_NullData() throws Exception {
+    Mockito.when(this.chatService.getChatById(1000L)).thenReturn(null);
+    Assert.assertEquals(Collections.emptyMap(), this.controller.fetchChatsById(1000L));
     Mockito.verify(this.chatService).getChatById(1000L);
     Mockito.verifyNoMoreInteractions(this.chatService);
   }
