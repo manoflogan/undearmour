@@ -153,6 +153,10 @@ public class ChatRecordDao implements IChatRecordDao {
     return Collections.unmodifiableSet(chatRecords);
   }
 
+  /**
+   * Marks the chat records as expired by resetting the expiration time stamp
+   * for a set of user ids.
+   */
   @Override
   public int markChatRecordsAsExpired(final Set<Long> userIds) {
     // TODO Auto-generated method stub
