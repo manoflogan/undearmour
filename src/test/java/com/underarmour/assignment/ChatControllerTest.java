@@ -68,6 +68,8 @@ public class ChatControllerTest {
     Assert.assertEquals(map.get("username"), chatRecord.getUsername());
     Assert.assertEquals(map.get("text"), chatRecord.getText());
     Assert.assertEquals(map.get("expiration_date"), chatRecord.getExpirationDate());
+    Mockito.verify(this.chatService).getChatById(1000L);
+    Mockito.verifyNoMoreInteractions(this.chatService);
   }
   
   @Test
@@ -87,7 +89,8 @@ public class ChatControllerTest {
     expected.put("text", chatRecord.getText());
     set.add(expected);
     Assert.assertEquals(set, actual);
-    
+    Mockito.verify(this.chatService).getChatRecordByUserName("username");
+    Mockito.verifyNoMoreInteractions(this.chatService);
   }
 
 }
