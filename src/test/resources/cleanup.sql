@@ -1,1 +1,1 @@
-DELETE FROM Chats;
+DELETE FROM Chats;DELETE FROM Expired_Chats;
