@@ -91,14 +91,17 @@ public class ChatRecordDao implements IChatRecordDao {
   @Override
   public ChatRecord getChatRecordById(final long id) {
     // TODO Auto-generated method stub
-    String sql =  new StringBuilder().append(
-        "SELECT chat_id, username, chat_text, expiration_date FROM Chats WHERE chat_id = ?").
-            toString();
+    String sql =  new StringBuilder().
+        append("SELECT chat_id, username, chat_text, expiration_date FROM Chats WHERE chat_id = ?").
+        append(" UNION ALL ").
+        append("SELECT chat_id, username, chat_text, expiration_date FROM Expired_Chats WHERE chat_id = ?").
+        toString();
     return this.jdbcTemplate.query(sql, new PreparedStatementSetter() {
       
       @Override
       public void setValues(PreparedStatement ps) throws SQLException {
         ps.setLong(1,  id);
+        ps.setLong(2,  id);
       }
     }, new ResultSetExtractor<ChatRecord>() {
 
@@ -124,7 +127,9 @@ public class ChatRecordDao implements IChatRecordDao {
    */
   @Override
   public Set<ChatRecord> getChatRecordsByUsername(String username) {
-    String sql = "SELECT chat_id, chat_text, expiration_date FROM CHATS where username = ? and expiration_date >= ?";
+    String sql =
+        new StringBuilder("SELECT chat_id, chat_text, expiration_date FROM Chats ").
+            append("where username = ? and expiration_date >= ?").toString();
     Set<ChatRecord> chatRecords = 
         this.jdbcTemplate.query(sql, new PreparedStatementSetter() {
 

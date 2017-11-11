@@ -88,6 +88,40 @@ public class ChatRecordServiceTest {
   }
   
   @Test
+  public void testGetChatById_Expired() throws Exception {
+    ChatRecord record = new ChatRecord();
+    record.setUsername("test");
+    record.setText("text");
+    record.setTimeout(1500);
+    int count = jdbcTemplate.queryForObject(
+        "SELECT count(*) from Chats", int.class);
+    Assert.assertEquals(0, count);
+
+    long chatId = this.chatService.insertChatRecord(record);
+    record.setChatId(chatId);
+    count = jdbcTemplate.queryForObject(
+        "SELECT count(*) from Chats", int.class);
+    Assert.assertEquals(1, count);
+    
+    Set<ChatHistory> chatHistories = this.chatService.getChatRecordByUserName(record.getUsername());
+    Assert.assertEquals(1, chatHistories.size());
+    ChatHistory chatHistory = chatHistories.iterator().next(); 
+    Assert.assertEquals(record.getUsername(), chatHistory.getUsername());
+    Assert.assertEquals(record.getText(), chatHistory.getText());
+    Assert.assertEquals(record.getChatId(), chatHistory.getChatId());
+    
+     count = jdbcTemplate.queryForObject(
+        "SELECT count(*) from Chats", int.class);
+     Assert.assertEquals(0, count);
+     
+     ChatHistory fetchedChatHistory = this.chatService.getChatById(chatId);
+     Assert.assertEquals(record.getUsername(), fetchedChatHistory.getUsername());
+     Assert.assertEquals(record.getText(), fetchedChatHistory.getText());
+     Assert.assertEquals(record.getChatId(), fetchedChatHistory.getChatId());
+
+  }
+  
+  @Test
   public void testGetChatRecordByUserName() throws Exception {
     ChatRecord record = new ChatRecord();
     record.setUsername("test");
