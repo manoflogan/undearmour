@@ -39,6 +39,13 @@ public interface IChatRecordDao {
    * @param userIds user ids
    * @return number of affected rows
    */
-  int markChatRecordsAsExpired(Set<Long> userIds);
+  int deleteByIds(Set<Long> userIds);
+  
+  /**
+   * Inserts the data into expired
+   * 
+   * @param chatRecords chat records to be inserted
+   */
+  void insertDataInExpiredTable(Set<ChatRecord> chatRecords);
 
 }

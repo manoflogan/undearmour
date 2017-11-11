@@ -9,8 +9,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -52,7 +55,6 @@ public class ChatRecordDao implements IChatRecordDao {
   /**
    * Inserts the chat record into the database.
    */
-  @Override
   public long insertChatRecord(final ChatRecord chatRecord) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Inserting chat record: " + chatRecord);
@@ -61,10 +63,10 @@ public class ChatRecordDao implements IChatRecordDao {
     long chatId = SequenceGenerator.getInstance().next();
     chatRecord.setChatId(chatId);
     Instant instant = Instant.now();
-    instant.atZone(ZoneOffset.UTC);
+    
     Instant newInstant = instant.plusSeconds
        (chatRecord.getTimeout() != null ? chatRecord.getTimeout().intValue() : 60);
-   
+    ZonedDateTime zdt = newInstant.atZone(ZoneOffset.UTC);
     StringBuilder sb = new StringBuilder();
     sb.append("INSERT INTO Chats(chat_id, username, chat_text, expiration_date) ");
     sb.append("VALUES(?, ?, ?, ?)");
@@ -77,7 +79,7 @@ public class ChatRecordDao implements IChatRecordDao {
         ps.setLong(1, chatRecord.getChatId());
         ps.setString(2,  chatRecord.getUsername());
         ps.setString(3,  chatRecord.getText());
-        ps.setTimestamp(4, Timestamp.from(newInstant));
+        ps.setTimestamp(4, Timestamp.from(zdt.toInstant()));
       }});
     return chatId;
   }
@@ -130,8 +132,8 @@ public class ChatRecordDao implements IChatRecordDao {
       public void setValues(PreparedStatement ps) throws SQLException {
         ps.setString(1, username);
         Instant instant = Instant.now();
-        instant.atOffset(ZoneOffset.UTC);
-        ps.setTimestamp(2,  Timestamp.from(instant));
+        ZonedDateTime zt = instant.atZone(ZoneOffset.UTC);
+        ps.setTimestamp(2,  Timestamp.from(zt.toInstant()));
       }
       
     }, new ResultSetExtractor<Set<ChatRecord>>() {
@@ -158,10 +160,10 @@ public class ChatRecordDao implements IChatRecordDao {
    * for a set of user ids.
    */
   @Override
-  public int markChatRecordsAsExpired(final Set<Long> userIds) {
+  public int deleteByIds(final Set<Long> userIds) {
     // TODO Auto-generated method stub
     StringBuilder sql = new StringBuilder(
-        "UPDATE Chats SET expiration_date = ? WHERE chat_id IN (");
+        "DELETE FROM Chats WHERE chat_id IN (");
     for (int i = 0; i < userIds.size(); i++) {
       sql.append("?");
       if (i < (userIds.size() - 1)) {
@@ -173,15 +175,33 @@ public class ChatRecordDao implements IChatRecordDao {
 
       @Override
       public void setValues(PreparedStatement ps) throws SQLException {
-        Instant instant = Instant.now();
-        instant.atOffset(ZoneOffset.UTC);
-        ps.setTimestamp(1, Timestamp.from(instant));
-        int counter = 2;
+        int counter = 1;
         for (long userId : userIds) {
           ps.setLong(counter ++, userId);
         }
       }
     });
+  }
+
+  @Override
+  public void insertDataInExpiredTable(Set<ChatRecord> chatRecords) {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Trying to inserting " + chatRecords.size() + " record(s) into the expired chat table.");
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append("INSERT INTO Expired_Chats(chat_id, username, chat_text, expiration_date) ");
+    sb.append("VALUES(?, ?, ?, ?)");
+    
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Triggering " + chatRecords.size() + " batch insert(s) to expired chat table.");
+    }
+    List<Object[]> arguments = new ArrayList<>();
+    for (ChatRecord chatRecord : chatRecords) {
+      Object[] args = new Object[] {chatRecord.getChatId(), chatRecord.getUsername(),
+          chatRecord.getText(), Timestamp.from(chatRecord.getExpirationTimestamp())};
+      arguments.add(args);
+    }
+    this.jdbcTemplate.batchUpdate(sb.toString(), arguments);
   }
 
 }

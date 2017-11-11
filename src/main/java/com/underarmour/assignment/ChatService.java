@@ -99,13 +99,20 @@ public class ChatService implements IChatService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Marking the chat records as expired. " + userIds);
       }
-      int rowsUpdated = this.chatRecordDao.markChatRecordsAsExpired(userIds);
-      //assert rowsUpdated == userIds.size();
+      int rowsDeleted = this.chatRecordDao.deleteByIds(userIds);
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug(rowsUpdated + " row(s) were updated for username " + username);
+        LOGGER.debug(rowsDeleted + " row(s) were deleted from Chats for username " + username);
       }
+      this.chatRecordDao.insertDataInExpiredTable(chatRecords);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(
+            rowsDeleted + " row(s) were inserted into Expired Chats for username " + username);
+      }
+      
     }
     return Collections.unmodifiableSet(chatHistories);
   }
+  
+  
 
 }
